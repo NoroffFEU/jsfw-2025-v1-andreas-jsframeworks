@@ -22,10 +22,10 @@ describe("ProductCard", () => {
       </MemoryRouter>
     );
 
-    // ✅ Title
+    // Title
     expect(screen.getByText("Test Product")).toBeInTheDocument();
 
-    // ✅ Discounted price and original price (match the component format)
+    // Discounted price and original price (match the component format)
     expect(screen.getByText("$150.00")).toBeInTheDocument(); // discounted price
     expect(screen.getByText("$200.00")).toBeInTheDocument(); // original price
   });

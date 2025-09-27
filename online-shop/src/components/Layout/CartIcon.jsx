@@ -1,4 +1,3 @@
-// src/components/Layout/CartIcon.jsx
 import { useCart } from "../../store/cart";
 
 export default function CartIcon() {

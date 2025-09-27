@@ -1,52 +1,89 @@
+
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { getProduct } from "../api/client";
 import { useCart } from "../store/cart";
 import toast from "react-hot-toast";
 
 export default function ProductPage() {
   const { id } = useParams();
+  const add = useCart(s => s.add);
   const [p, setP] = useState(null);
-  const [status, setStatus] = useState("loading");
-  const add = useCart((s) => s.add);
+  const [loading, setLoading] = useState(true);
+  const [err, setErr] = useState("");
 
   useEffect(() => {
-    getProduct(id)
-      .then((data) => { setP(data); setStatus("ok"); })
-      .catch(() => setStatus("error"));
+    let active = true;
+    (async () => {
+      try {
+        setLoading(true);
+        const res = await fetch(`https://v2.api.noroff.dev/online-shop/${id}`);
+        if (!res.ok) throw new Error("Failed loading product");
+        const data = await res.json();
+        if (active) setP(data?.data || null);
+      } catch (e) {
+        setErr(e.message || "Unknown error");
+      } finally {
+        if (active) setLoading(false);
+      }
+    })();
+    return () => { active = false; };
   }, [id]);
 
-  if (status === "loading") return <p style={{ padding: 16 }}>Loading…</p>;
-  if (status === "error" || !p) return <p style={{ padding: 16 }}>Not found.</p>;
+  if (loading) return <p className="container">Loading…</p>;
+  if (err) return <p className="container">Error: {err}</p>;
+  if (!p) return <p className="container">No product found.</p>;
 
-  const hasDiscount =
-    typeof p.discountedPrice === "number" && p.discountedPrice < p.price;
-  const priceNow   = hasDiscount ? p.discountedPrice : p.price;
+  const hasDiscount = typeof p.discountedPrice === "number" && p.discountedPrice < p.price;
 
   return (
-    <div style={{ padding: 16, display: "grid", gap: 16, gridTemplateColumns: "1fr 1fr" }}>
-      <img
-        src={p.image?.url || "https://via.placeholder.com/600"}
-        alt={p.title}
-        style={{ width: "100%", objectFit: "cover", borderRadius: 12 }}
-      />
+    <div className="container product">
       <div>
+        <img
+          className="product-img"
+          src={p.image?.url || p.imageUrl || "https://via.placeholder.com/600"}
+          alt={p.image?.alt || p.title}
+        />
+      </div>
+
+      <div className="product-body">
         <h1>{p.title}</h1>
-        {hasDiscount ? (
-          <p>
-            <span style={{ textDecoration: "line-through", opacity: .6 }}>${p.price.toFixed(2)}</span>{" "}
-            <strong>${priceNow.toFixed(2)}</strong>
-          </p>
-        ) : (
-          <p><strong>${p.price.toFixed(2)}</strong></p>
-        )}
-        <p>{p.description}</p>
+        <div className="product-price">
+          {hasDiscount && <span className="price-old">${p.price.toFixed(2)}</span>}
+          <span className="price">${(hasDiscount ? p.discountedPrice : p.price).toFixed(2)}</span>
+        </div>
+
+        <div className="rating">Rating: {p.rating ?? "N/A"}/5</div>
+
+        <p style={{ marginTop: 12 }}>{p.description}</p>
+
+        {p.tags?.length ? (
+          <div className="tags">
+            {p.tags.map(t => <span key={t} className="tag">{t}</span>)}
+          </div>
+        ) : null}
+
         <button
-          onClick={() => { add(p, 1); toast.success("Added to cart"); }}
-          style={{ padding: "10px 16px", borderRadius: 10, background: "#111827", color: "#fff", border: 0 }}
+          className="btn"
+          onClick={() => {
+            add(p, 1);
+            toast.success("Added to cart");
+          }}
         >
-          Add to cart
+          Add to Cart
         </button>
+
+        {p.reviews?.length ? (
+          <section style={{ marginTop: 24 }}>
+            <h3 style={{ margin: 0 }}>Reviews</h3>
+            <ul>
+              {p.reviews.map((r, i) => (
+                <li key={i}>
+                  <strong>{r.username || "Anonymous"}</strong>: {r.description} ({r.rating}/5)
+                </li>
+              ))}
+            </ul>
+          </section>
+        ) : null}
       </div>
     </div>
   );

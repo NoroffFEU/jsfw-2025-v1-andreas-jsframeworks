@@ -1,4 +1,4 @@
-// src/components/Layout/Footer.jsx
+
 export default function Footer() {
   return (
     <footer className="site-footer">

@@ -1,4 +1,4 @@
-// src/App.jsx
+
 import { Routes, Route } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import Layout from "./components/Layout/Layout";
@@ -8,7 +8,7 @@ import CartPage from "./pages/CartPage";
 import CheckoutPage from "./pages/CheckoutPage";
 import CheckoutSuccessPage from "./pages/CheckoutSuccessPage";
 import ContactPage from "./pages/ContactPage";
-import NotFound from "./pages/NotFound"; // <-- add this
+import NotFound from "./pages/NotFound";
 
 export default function App() {
   return (
@@ -21,7 +21,7 @@ export default function App() {
           <Route path="/checkout" element={<CheckoutPage />} />
           <Route path="/checkout/success" element={<CheckoutSuccessPage />} />
           <Route path="/contact" element={<ContactPage />} />
-          <Route path="*" element={<NotFound />} /> {/* <-- add this */}
+          <Route path="*" element={<NotFound />} /> {}
         </Routes>
       </Layout>
       <Toaster position="bottom-right" />

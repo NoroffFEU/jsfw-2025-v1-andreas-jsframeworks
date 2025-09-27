@@ -1,56 +1,77 @@
-import { useCart } from "../store/cart";
+
 import { Link, useNavigate } from "react-router-dom";
+import { useCart } from "../store/cart";
 import toast from "react-hot-toast";
 
 export default function CartPage() {
-  const { items, setQty, remove, total } = useCart((s) => ({
-    items: s.items, setQty: s.setQty, remove: s.remove, total: s.total
-  }));
-  const list = Object.values(items);
+  const items = useCart(s => s.items);
+  const setQty = useCart(s => s.setQty);
+  const remove = useCart(s => s.remove);
+  const total = useCart(s => s.total());
   const navigate = useNavigate();
 
-  if (list.length === 0) {
+  const list = Object.values(items);
+
+  if (!list.length) {
     return (
-      <section style={{ padding: 16 }}>
-        <h1>Your cart is empty</h1>
-        <Link to="/">Back to store</Link>
-      </section>
+      <div className="container">
+        <h1>Your cart</h1>
+        <p>Your cart is empty.</p>
+        <Link className="btn" to="/">Browse products</Link>
+      </div>
     );
   }
 
   return (
-    <section style={{ padding: 16 }}>
-      <h1>Cart</h1>
-      <div style={{ display: "grid", gap: 12 }}>
-        {list.map((i) => (
-          <div key={i.id} style={{ display: "grid", gridTemplateColumns: "80px 1fr auto auto", gap: 12, alignItems: "center" }}>
-            <img src={i.imageUrl || "https://via.placeholder.com/80"} alt="" style={{ width: 80, height: 80, objectFit: "cover", borderRadius: 8 }} />
-            <div>
-              <div style={{ fontWeight: 600 }}>{i.title}</div>
-              <div>${i.price.toFixed(2)}</div>
-            </div>
-            <input
-              type="number" min="1" value={i.qty}
-              onChange={(e) => setQty(i.id, e.target.value)}
-              style={{ width: 70, padding: 6 }}
+    <div className="container">
+      <h1>Your cart</h1>
+
+      <ul className="cart-list">
+        {list.map(i => (
+          <li key={i.id} className="cart-item">
+            <img
+              className="cart-thumb"
+              src={i.imageUrl || "https://via.placeholder.com/128"}
+              alt={i.title}
             />
-            <button onClick={() => { remove(i.id); toast.success("Removed"); }}>
+            <div className="cart-info">
+              <div className="cart-title">{i.title}</div>
+              <div className="cart-qty">
+                <label>
+                  Qty:
+                  <input
+                    type="number"
+                    min={1}
+                    value={i.qty}
+                    onChange={(e) => setQty(i.id, e.target.value)}
+                  />
+                </label>
+              </div>
+            </div>
+            <div style={{ fontWeight: 600 }}>${(i.price * i.qty).toFixed(2)}</div>
+            <button
+              className="link danger"
+              onClick={() => {
+                remove(i.id);
+                toast("Removed from cart", { icon: "🗑️" });
+              }}
+            >
               Remove
             </button>
-          </div>
+          </li>
         ))}
+      </ul>
+
+      <div className="cart-total">
+        <strong>Total</strong>
+        <strong>${total.toFixed(2)}</strong>
       </div>
 
-      <hr style={{ margin: "16px 0" }} />
-      <div style={{ display: "flex", justifyContent: "space-between" }}>
-        <strong>Total: ${total().toFixed(2)}</strong>
-        <button
-          onClick={() => navigate("/checkout")}
-          style={{ padding: "10px 16px", borderRadius: 10, background: "#111827", color: "#fff", border: 0 }}
-        >
+      <div style={{ marginTop: 16 }}>
+        <button className="btn" onClick={() => navigate("/checkout")}>
           Checkout
         </button>
       </div>
-    </section>
+    </div>
   );
 }

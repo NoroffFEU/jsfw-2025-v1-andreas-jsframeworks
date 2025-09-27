@@ -1,4 +1,4 @@
-// src/components/Layout/Header.jsx
+
 import { Link, NavLink } from "react-router-dom";
 import CartIcon from "./CartIcon";
 

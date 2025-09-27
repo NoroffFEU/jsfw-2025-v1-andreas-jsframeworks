@@ -1,24 +1,23 @@
 import { useNavigate } from "react-router-dom";
 import { useCart } from "../store/cart";
-import toast from "react-hot-toast";
 
 export default function CheckoutPage() {
-  const clear = useCart((s) => s.clear);
+  const total = useCart(s => s.total());
   const navigate = useNavigate();
 
-  function handleCheckout() {
-    clear();
-    toast.success("Checkout successful");
-    navigate("/checkout/success");
-  }
-
   return (
-    <section style={{ padding: 16 }}>
+    <div className="container">
       <h1>Checkout</h1>
-      <p>Confirm your order.</p>
-      <button onClick={handleCheckout} style={{ padding: "10px 16px", borderRadius: 10, background: "#111827", color: "#fff", border: 0 }}>
-        Pay now
+      <p>We don’t need real payment for this assignment. Click the button to “complete” checkout.</p>
+
+      <div className="cart-total" style={{ marginTop: 16 }}>
+        <strong>Total</strong>
+        <strong>${total.toFixed(2)}</strong>
+      </div>
+
+      <button className="btn" style={{ marginTop: 16 }} onClick={() => navigate("/checkout/success")}>
+        Complete order
       </button>
-    </section>
+    </div>
   );
 }
